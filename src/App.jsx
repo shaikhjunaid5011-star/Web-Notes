@@ -8,6 +8,8 @@ function App() {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showCreatePopup, setShowCreatePopup] = useState(false);
 
   const [task, setTask] = useState(() => {
     if (typeof window === "undefined") return [];
@@ -31,6 +33,20 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [showPopup]);
 
+  useEffect(() => {
+    if (!showDeletePopup) return;
+
+    const timer = window.setTimeout(() => setShowDeletePopup(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [showDeletePopup]);
+
+  useEffect(() => {
+    if (!showCreatePopup) return;
+
+    const timer = window.setTimeout(() => setShowCreatePopup(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [showCreatePopup]);
+
   const submitHandler = (e) => {
     e.preventDefault();
 
@@ -51,19 +67,47 @@ function App() {
       },
     ]);
 
+    setShowCreatePopup(true);
     setTitle("");
     setDetail("");
   };
 
   const deleteHandler = (id) => {
     setTask((prevTask) => prevTask.filter((note) => note.id !== id));
+    setShowDeletePopup(true);
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("detail-input")?.focus();
+    }
+  };
+
+  const handleDetailKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submitHandler(e);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_40%),_linear-gradient(135deg,_#020617_0%,_#111827_60%,_#000000_100%)] text-white">
       {showPopup && (
-        <div className="fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold shadow-lg animate-pulse">
+        <div className="fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-xl border border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white shadow-lg">
           Please fill both fields before adding a note.
+        </div>
+      )}
+
+      {showDeletePopup && (
+        <div className="fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-xl border border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          Note has Deleted...
+        </div>
+      )}
+
+      {showCreatePopup && (
+        <div className="fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-xl border border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          You made a note.
         </div>
       )}
 
@@ -99,16 +143,19 @@ function App() {
               className="mt-2 w-full rounded-xl border border-white/15 bg-black-400/70 px-5 py-3 text-base font-medium text-white outline-none transition focus:border-cyan-400"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleTitleKeyDown}
             />
           </label>
 
           <label className="w-full text-sm font-medium text-slate-300">
             Details
             <textarea
+              id="detail-input"
               placeholder="Write Notes"
               className="mt-2 h-36 w-full rounded-xl border border-white/15 bg-black-400/70 px-5 py-3 text-base font-medium text-white outline-none transition focus:border-cyan-400"
               value={detail}
               onChange={(e) => setDetail(e.target.value)}
+              onKeyDown={handleDetailKeyDown}
             />
           </label>
 
@@ -204,6 +251,12 @@ function App() {
             </div>
           )}
         </section>
+      </div>
+      <hr className="bg-black-400/" />
+      <div className="flex flex-1 items-center justify-center  bg-black-400/40 p-3 text-center text-slate-300">
+        <ul>
+          Make your note that store in local storage - Build By "Junaid" The OG
+        </ul>
       </div>
     </div>
   );
